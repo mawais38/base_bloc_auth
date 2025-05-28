@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_bloc:
+  firebase_auth:
 dev_dependencies:
   flutter_test:
     sdk: flutter
