@@ -1,5 +1,6 @@
 import 'package:base_bloc_auth/data/auth_services.dart';
 import 'package:bloc/bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 
 part 'auth_event.dart';
@@ -14,28 +15,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         super(AuthInitial()) {
     on<LoginButtonPressed>(_handleLogin);
     on<SignUpButtonPressed>(_handleSignUp);
-    // on<AuthStarted>(_handleAuthStarted);
+    on<AuthStarted>(_handleAuthStarted);
     // on<VerifyEmailButtonPressed>(_handleVerifyEmail);
   }
 
   ///
   /// Auth started at the start of app
   ///
-  // Future<void> _handleAuthStarted(AuthStarted event, Emitter<AuthState> emit) async {
-  //   emit(AuthInProgress());
-  //   try {
-  //     final user = FirebaseAuth.instance.currentUser;
-  //     if (user == null) {
-  //       emit(AuthFailure(error: ''));
-  //       return;
-  //     }
-  //     final userData = await AuthService().getCurrentUserData(event.collectionName);
-  //     // emit(AuthSuccess(user: userData));
-  //     emit(AuthFailure(error: ''));
-  //   } catch (e) {
-  //     emit(AuthFailure(error: e.toString()));
-  //   }
-  // }
+  Future<void> _handleAuthStarted(AuthStarted event, Emitter<AuthState> emit) async {
+    emit(AuthInProgress());
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        emit(AuthFailure(error: ''));
+        return;
+      }
+      final userData = await AuthService().getCurrentUserData(event.collectionName);
+      emit(AuthSuccess(user: userData));
+    } catch (e) {
+      emit(AuthFailure(error: e.toString()));
+    }
+  }
 
   ///
   /// handle login
