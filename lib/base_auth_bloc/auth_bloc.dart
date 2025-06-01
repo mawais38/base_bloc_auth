@@ -30,8 +30,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthInitial());
         return;
       }
-
-      // Use the collection name passed via the event
       final userData = await AuthService().getCurrentUserData(event.collectionName);
       emit(AuthSuccess(user: userData));
     } catch (e) {
