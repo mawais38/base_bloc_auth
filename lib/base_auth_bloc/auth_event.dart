@@ -35,13 +35,13 @@ class SignUpButtonPressed extends AuthEvent {
   List<Object?> get props => [email, password, userData, collectionName];
 }
 
-class AuthStarted extends AuthEvent {
-  final String collectionName;
-
-  AuthStarted({required this.collectionName});
-
-  @override
-  List<Object?> get props => [collectionName];
-}
+// class AuthStarted extends AuthEvent {
+//   final String collectionName;
+//
+//   AuthStarted({required this.collectionName});
+//
+//   @override
+//   List<Object?> get props => [collectionName];
+// }
 
 class VerifyEmailButtonPressed extends AuthEvent {}
