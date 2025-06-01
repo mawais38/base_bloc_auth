@@ -1,6 +1,5 @@
 import 'package:base_bloc_auth/data/auth_services.dart';
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 
@@ -15,16 +14,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   })  : authService = authService ?? AuthService(),
         super(AuthInitial()) {
     on<LoginButtonPressed>(_handleLogin);
-    // on<SignUpButtonPressed>(_handleSignUp);
+    on<SignUpButtonPressed>(_handleSignUp);
     on<AuthStarted>(_handleAuthStarted);
     // on<VerifyEmailButtonPressed>(_handleVerifyEmail);
-    on<LoginSuccessEvent>(_handleSuccess);
   }
 
   ///
   /// Auth started at the start of app
   ///
-  Future<void> _handleAuthStarted(AuthStarted event, Emitter<AuthState> emit) async {
+  Future<void> _handleAuthStarted(
+      AuthStarted event, Emitter<AuthState> emit) async {
     emit(AuthInProgress());
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -37,27 +36,38 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ///
   /// handle login
   ///
-  Future<void> _handleLogin(LoginButtonPressed event, Emitter<AuthState> emit) async {
+  Future<void> _handleLogin(
+      LoginButtonPressed event, Emitter<AuthState> emit) async {
     emit(AuthInProgress());
 
     try {
-      // Step 1: Sign in with Firebase Auth
-      UserCredential credential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: event.username, password: event.password);
+      final userData = await authService.signInWithEmail(
+        email: event.username,
+        password: event.password,
+        collectionName: event.collectionName,
+      );
+      emit(AuthSuccess(user: userData));
+    } catch (e) {
+      emit(AuthFailure(error: e.toString()));
+    }
+  }
 
-      final uid = credential.user?.uid;
-      if (uid == null) {
-        emit(AuthFailure(error: "Invalid user credentials."));
-        return;
-      }
+  ///
+  /// hanlde signup
+  ///
+  Future<void> _handleSignUp(
+      SignUpButtonPressed event, Emitter<AuthState> emit) async {
+    emit(AuthInProgress());
 
-      // Step 2: Fetch user data from Firestore collection
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection(event.collectionName).doc(uid).get();
+    try {
+      final newUser = await authService.signUpWithEmail(
+        email: event.email,
+        password: event.password,
+        userData: event.userData,
+        collectionName: event.collectionName,
+      );
 
-      if (userDoc.exists) {
-        emit(AuthSuccess(user: userDoc.data()));
-      } else {
-        emit(AuthFailure(error: "User document not found in Firestore."));
-      }
+      emit(AuthSuccess(user: newUser));
     } catch (e) {
       emit(AuthFailure(error: e.toString()));
     }
