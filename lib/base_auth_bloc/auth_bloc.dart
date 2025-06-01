@@ -22,22 +22,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ///
   /// Auth started at the start of app
   ///
-  Future<void> _handleAuthStarted(
-      AuthStarted event, Emitter<AuthState> emit) async {
+  Future<void> _handleAuthStarted(AuthStarted event, Emitter<AuthState> emit) async {
     emit(AuthInProgress());
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      emit(AuthSuccess(user: {'uid': user.uid, 'email': user.email}));
-    } else {
-      emit(AuthInitial());
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        emit(AuthInitial());
+        return;
+      }
+
+      // Use the collection name passed via the event
+      final userData = await AuthService().getCurrentUserData(event.collectionName);
+      emit(AuthSuccess(user: userData));
+    } catch (e) {
+      emit(AuthFailure(error: e.toString()));
     }
   }
 
   ///
   /// handle login
   ///
-  Future<void> _handleLogin(
-      LoginButtonPressed event, Emitter<AuthState> emit) async {
+  Future<void> _handleLogin(LoginButtonPressed event, Emitter<AuthState> emit) async {
     emit(AuthInProgress());
 
     try {
@@ -55,8 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ///
   /// hanlde signup
   ///
-  Future<void> _handleSignUp(
-      SignUpButtonPressed event, Emitter<AuthState> emit) async {
+  Future<void> _handleSignUp(SignUpButtonPressed event, Emitter<AuthState> emit) async {
     emit(AuthInProgress());
 
     try {
