@@ -31,7 +31,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
       final userData = await AuthService().getCurrentUserData(event.collectionName);
-      emit(AuthSuccess(user: userData));
+      // emit(AuthSuccess(user: userData));
+      emit(AuthFailure(error: ''));
     } catch (e) {
       emit(AuthFailure(error: e.toString()));
     }
