@@ -27,7 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        emit(AuthInitial());
+        emit(AuthFailure(error: ''));
         return;
       }
       final userData = await AuthService().getCurrentUserData(event.collectionName);

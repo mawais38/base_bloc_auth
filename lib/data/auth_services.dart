@@ -26,16 +26,12 @@ class AuthService {
     required String collectionName,
   }) async {
     UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-
     final uid = userCredential.user!.uid;
     final data = {
-      'uid': uid,
-      'email': email,
+      'id': '${uid}',
       ...userData,
     };
-
     await FirebaseFirestore.instance.collection(collectionName).doc(uid).set(data);
-
     return data;
   }
 
